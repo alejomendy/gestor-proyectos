@@ -27,11 +27,13 @@ class ProjectResource extends Resource
     {
         return $form
             ->schema([
+                Forms\Components\Select::make('server_id')
+                    ->relationship('server', 'name')
+                    ->label('Servidor de Despliegue')
+                    ->searchable()
+                    ->preload(),
                 Forms\Components\TextInput::make('name')
                     ->label('Proyecto'),
-                Forms\Components\TextInput::make('organization')
-                    ->label('Entorno / Organización'),
-
                 Forms\Components\Select::make('status')
                     ->label('Estado')
                     ->options([
@@ -77,6 +79,10 @@ class ProjectResource extends Resource
                 TextColumn::make('name')
                     ->label('Proyecto')
                     ->searchable()
+                    ->sortable(),
+
+                TextColumn::make('server.name')
+                    ->label('Servidor')
                     ->sortable(),
 
                 TextColumn::make('organization')
@@ -125,6 +131,18 @@ class ProjectResource extends Resource
                         default => 'gray',
                     }),
 
+                TextColumn::make('milestones_count')
+                    ->counts('milestones')
+                    ->label('Hitos')
+                    ->badge()
+                    ->color('info'),
+
+                TextColumn::make('tickets_count')
+                    ->counts('tickets')
+                    ->label('Tickets')
+                    ->badge()
+                    ->color('warning'),
+
                 TextColumn::make('framework')
                     ->label('Frame.')
                     ->badge()
@@ -154,7 +172,9 @@ class ProjectResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\MilestonesRelationManager::class,
+            RelationManagers\DocumentsRelationManager::class,
+            RelationManagers\TicketsRelationManager::class,
         ];
     }
 

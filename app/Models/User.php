@@ -21,7 +21,23 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
     ];
+
+    public function milestones()
+    {
+        return $this->belongsToMany(Milestone::class);
+    }
+
+    public function reportedTickets()
+    {
+        return $this->hasMany(Ticket::class, 'reporter_id');
+    }
+
+    public function assignedTickets()
+    {
+        return $this->hasMany(Ticket::class, 'assignee_id');
+    }
 
     /**
      * The attributes that should be hidden for serialization.
