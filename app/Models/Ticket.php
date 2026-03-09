@@ -4,8 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
+
 class Ticket extends Model
 {
+    use LogsActivity;
+
     protected $guarded = [];
 
     public static function getStatuses(): array
@@ -61,6 +66,14 @@ class Ticket extends Model
                 'filament_color' => 'success',
             ],
         ];
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty()
+            ->setDescriptionForEvent(fn(string $eventName) => "Ticket: {$this->title} ha sido {$eventName}");
     }
 
     public function project()

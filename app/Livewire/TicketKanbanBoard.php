@@ -21,10 +21,22 @@ class TicketKanbanBoard extends Component implements HasForms, HasActions
     use InteractsWithActions;
 
     public $statuses = [];
+    public $selectedProjectId = null;
+
+    protected $queryString = ['selectedProjectId'];
 
     public function mount()
     {
         $this->statuses = Ticket::getStatuses();
+
+        if (!$this->selectedProjectId) {
+            $this->selectedProjectId = Project::first()?->id;
+        }
+    }
+
+    public function selectProject($projectId)
+    {
+        $this->selectedProjectId = $projectId;
     }
 
     public function createTicketAction(array $arguments = []): Action
@@ -37,21 +49,22 @@ class TicketKanbanBoard extends Component implements HasForms, HasActions
                     ->maxLength(255),
                 Textarea::make('description')
                     ->columnSpanFull(),
-                Select::make('project_id')
-                    ->label('Proyecto')
-                    ->options(Project::pluck('name', 'id'))
-                    ->required()
-                    ->searchable(),
                 Select::make('assignee_id')
                     ->label('Asignado a')
                     ->options(User::pluck('name', 'id'))
                     ->searchable(),
             ])
             ->action(function (array $data, array $arguments): void {
+                if (!$this->selectedProjectId)
+                    return;
+
                 Ticket::create([
                     ...$data,
+                    'project_id' => $this->selectedProjectId,
                     'status' => $arguments['status'] ?? 'todo',
-                    'order_column' => Ticket::where('status', $arguments['status'] ?? 'todo')->max('order_column') + 1,
+                    'order_column' => Ticket::where('project_id', $this->selectedProjectId)
+                        ->where('status', $arguments['status'] ?? 'todo')
+                        ->max('order_column') + 1,
                     'reporter_id' => auth()->id(),
                 ]);
             });
@@ -69,13 +82,17 @@ class TicketKanbanBoard extends Component implements HasForms, HasActions
 
     public function render()
     {
+        $projects = Project::orderBy('name')->get();
+
         $tickets = Ticket::with(['project', 'assignee'])
+            ->when($this->selectedProjectId, fn($query) => $query->where('project_id', $this->selectedProjectId))
             ->orderBy('order_column')
             ->get()
             ->groupBy('status');
 
         return view('livewire.ticket-kanban-board', [
             'tickets' => $tickets,
+            'projects' => $projects,
         ]);
     }
 }

@@ -5,6 +5,7 @@ namespace App\Filament\Resources\MilestoneResource\Pages;
 use App\Filament\Resources\MilestoneResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ManageRecords;
+use Illuminate\Contracts\View\View;
 
 class ManageMilestones extends ManageRecords
 {
@@ -15,5 +16,10 @@ class ManageMilestones extends ManageRecords
         return [
             Actions\CreateAction::make(),
         ];
+    }
+
+    public function getHeader(): ?View
+    {
+        return view('filament.milestones.header');
     }
 }
