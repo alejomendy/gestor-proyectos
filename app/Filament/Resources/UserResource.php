@@ -16,8 +16,10 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
-
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $label = 'Usuarios';
+    protected static ?string $navigationIcon = 'heroicon-s-user';
+    protected static ?int $navigationSort = 6;
+    protected static ?string $navigationGroup = 'Seguridad';
 
     public static function form(Form $form): Form
     {
@@ -37,9 +39,9 @@ class UserResource extends Resource
                 Forms\Components\Select::make('role')
                     ->options([
                         'admin' => 'Administrador',
-                        'developer' => 'Desarrollador',
-                        'client' => 'Cliente',
-                        'user' => 'Usuario',
+                        'desarrollador' => 'Desarrollador',
+                        'asignado de area' => 'Asignado de Area',
+                        'usuario' => 'Usuario',
                     ])
                     ->default('user')
                     ->required(),
@@ -58,9 +60,9 @@ class UserResource extends Resource
                     ->badge()
                     ->color(fn(string $state): string => match ($state) {
                         'admin' => 'danger',
-                        'developer' => 'info',
-                        'client' => 'warning',
-                        'user' => 'gray',
+                        'Desarrollador' => 'info',
+                        'Asignado de Area' => 'warning',
+                        'Usuario' => 'gray',
                         default => 'gray',
                     }),
                 Tables\Columns\TextColumn::make('created_at')

@@ -13,12 +13,12 @@ class ManageTickets extends ManageRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\Action::make('kanban')
-                ->label('Vista Tablero')
-                ->icon('heroicon-o-view-columns')
-                ->color('warning')
-                ->url(TicketResource::getUrl('kanban')),
-            Actions\CreateAction::make(),
+            // Actions\Action::make('kanban')
+            //     ->label('Vista Tablero')
+            //     ->icon('heroicon-o-view-columns')
+            //     ->color('warning')
+            //     ->url(TicketResource::getUrl('kanban')),
+            // Actions\CreateAction::make(),
         ];
     }
 }

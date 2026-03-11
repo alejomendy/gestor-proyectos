@@ -12,14 +12,17 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Enums\MilestoneStatus;
 
 class MilestoneResource extends Resource
 {
     protected static ?string $model = Milestone::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-circle-stack';
 
     protected static ?string $navigationLabel = 'Hitos';
+    protected static ?int $navigationSort = 2;
+    protected static ?string $navigationGroup = 'Gestión';
 
     protected static ?string $pluralModelLabel = 'Hitos';
 
@@ -42,13 +45,8 @@ class MilestoneResource extends Resource
                 Forms\Components\DatePicker::make('start_date'),
                 Forms\Components\DatePicker::make('due_date'),
                 Forms\Components\Select::make('status')
-                    ->options([
-                        'pending' => 'Pendiente',
-                        'in_progress' => 'En Progreso',
-                        'completed' => 'Completado',
-                        'delayed' => 'Retrasado',
-                    ])
-                    ->default('pending')
+                    ->options(MilestoneStatus::class)
+                    ->default(MilestoneStatus::Pending)
                     ->required(),
                 Forms\Components\TextInput::make('progress')
                     ->numeric()
@@ -66,7 +64,6 @@ class MilestoneResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('project.name')
-                    ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
@@ -77,14 +74,7 @@ class MilestoneResource extends Resource
                     ->date()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
-                    ->badge()
-                    ->color(fn(string $state): string => match ($state) {
-                        'pending' => 'gray',
-                        'in_progress' => 'info',
-                        'completed' => 'success',
-                        'delayed' => 'danger',
-                        default => 'gray',
-                    }),
+                    ->badge(),
                 Tables\Columns\TextColumn::make('progress')
                     ->numeric()
                     ->sortable()

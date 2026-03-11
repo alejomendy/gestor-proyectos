@@ -5,6 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
+use App\Enums\ProjectStatus;
+use App\Enums\ProjectPriority;
+use App\Enums\EnvironmentType;
+use App\Enums\ProjectTechnology;
+
 class Project extends Model
 {
     use HasFactory;
@@ -13,9 +18,20 @@ class Project extends Model
     // y te permite guardar todos los campos
     protected $guarded = [];
 
+    protected $casts = [
+        'status' => ProjectStatus::class,
+        'priority' => ProjectPriority::class,
+        'environment_type' => EnvironmentType::class,
+    ];
+
     public function server()
     {
         return $this->belongsTo(Server::class);
+    }
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class);
     }
 
     public function milestones()
@@ -32,4 +48,5 @@ class Project extends Model
     {
         return $this->hasMany(Ticket::class);
     }
+
 }

@@ -13,15 +13,20 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\BadgeColumn;
+use App\Enums\ProjectStatus;
+use App\Enums\ProjectPriority;
+use App\Enums\EnvironmentType;
+use App\Enums\ProjectTechnology;
 
 class ProjectResource extends Resource
 {
     protected static ?string $model = Project::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-archive-box';
 
-    protected static ?string $label = 'Estado del Proyecto';
+    protected static ?string $label = 'Proyectos';
+    protected static ?int $navigationSort = 2;
+    protected static ?string $navigationGroup = 'Gestión';
 
     public static function form(Form $form): Form
     {
@@ -33,41 +38,45 @@ class ProjectResource extends Resource
                     ->searchable()
                     ->preload(),
                 Forms\Components\TextInput::make('name')
-                    ->label('Proyecto'),
+                    ->label('Nombre del Proyecto')
+                    ->required(),
+                Forms\Components\Select::make('users')
+                    ->multiple()
+                    ->relationship('users', 'name')
+                    ->label('Usuarios asignados')
+                    ->searchable()
+                    ->preload(),
                 Forms\Components\Select::make('status')
                     ->label('Estado')
-                    ->options([
-                        'Activo' => 'Activo',
-                        'Mantenimiento' => 'Mantenimiento',
-                        'No Desplegado' => 'No Desplegado',
-                        'Caido' => 'Caido',
-                    ]),
+                    ->options(ProjectStatus::class)
+                    ->required(),
                 Forms\Components\Select::make('priority')
                     ->label('Prioridad')
-                    ->options([
-                        'Baja' => 'Baja',
-                        'Normal' => 'Normal',
-                        'Alta' => 'Alta',
-                        'Critica' => 'Critica',
-                    ]),
-                Forms\Components\TextInput::make('technology')
+                    ->options(ProjectPriority::class)
+                    ->required(),
+                Forms\Components\Select::make('technology')
                     ->label('Tecnología')
+                    ->options(ProjectTechnology::class)
                     ->default('php'),
 
                 Forms\Components\TextInput::make('repository_url')
                     ->label('URL del Repositorio')
                     ->url(),
+                Forms\Components\TextInput::make('domain')
+                    ->label('Dominio del Proyecto')
+                    ->url(),
                 Forms\Components\Select::make('environment_type')
                     ->label('Entorno de Despliegue')
-                    ->options([
-                        'Desarrollo - Test' => 'Desarrollo - Test',
-                        'Produccion' => 'Produccion',
-                    ]),
+                    ->options(EnvironmentType::class)
+                    ->required(),
                 Forms\Components\TextInput::make('framework')
                     ->label('Framework')
                     ->default('Laravel'),
                 Forms\Components\TextInput::make('app_url_or_note')
-                    ->label('URL / Nota / Error'),
+                    ->label('URL de la App o Notas Rápidas'),
+                Forms\Components\Textarea::make('notes')
+                    ->label('Notas/detalles del proyecto')
+                    ->columnSpanFull(),
             ]);
     }
 
@@ -75,6 +84,11 @@ class ProjectResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('users.name')
+                    ->label('Usuarios asignados')
+                    ->badge()
+                    ->separator(',')
+                    ->sortable(),
                 // Columna simple
                 TextColumn::make('name')
                     ->label('Proyecto')
@@ -85,51 +99,28 @@ class ProjectResource extends Resource
                     ->label('Servidor')
                     ->sortable(),
 
-                TextColumn::make('organization')
-                    ->label('Entorno')
-                    ->sortable(),
-
-                // Columna con Badges de estado (como en la imagen)
                 TextColumn::make('status')
                     ->label('Estado')
-                    ->badge() // Convierte a badge
-                    ->color(fn(string $state): string => match ($state) {
-                        'Activo' => 'success', // Verde
-                        'Mantenimiento' => 'warning', // Naranja
-                        'No Desplegado' => 'gray', // Gris
-                        'Caido' => 'danger', // Rojo
-                        default => 'gray',
-                    }),
+                    ->badge(),
 
-                // Columna con Badges de prioridad
                 TextColumn::make('priority')
                     ->label('Prioridad')
-                    ->badge()
-                    ->color(fn(string $state): string => match ($state) {
-                        'Critica' => 'danger', // Rojo fuerte
-                        'Alta' => 'warning', // Naranja
-                        'Normal' => 'info', // Azul
-                        'Baja' => 'gray', // Gris
-                        default => 'gray',
-                    }),
+                    ->badge(),
 
                 TextColumn::make('technology')
                     ->label('Tec.')
-                    ->default('php'),
+                    ->badge()
+                    ->color(fn($state) => \App\Enums\ProjectTechnology::tryFrom($state)?->getColor() ?? 'gray')
+                    ->formatStateUsing(fn($state) => \App\Enums\ProjectTechnology::tryFrom($state)?->getLabel() ?? $state),
 
                 TextColumn::make('repository_url')
                     ->label('Repositorio')
-                    ->limit(30), // Limita el texto
+                    ->limit(30)
+                    ->toggleable(isToggledHiddenByDefault: true),
 
-                // Columna con Badges para el entorno
                 TextColumn::make('environment_type')
                     ->label('Entorno')
-                    ->badge()
-                    ->color(fn(string $state): string => match ($state) {
-                        'Produccion' => 'primary', // Azul principal
-                        'Desarrollo - Test' => 'secondary', // Color secundario
-                        default => 'gray',
-                    }),
+                    ->badge(),
 
                 TextColumn::make('milestones_count')
                     ->counts('milestones')
@@ -146,20 +137,18 @@ class ProjectResource extends Resource
                 TextColumn::make('framework')
                     ->label('Frame.')
                     ->badge()
-                    ->color('info') // Azul claro,
-                    ->icon('heroicon-m-code-bracket'), // Icono opcional
-
+                    ->color('info')
+                    ->icon('heroicon-m-code-bracket'),
                 TextColumn::make('app_url_or_note')
-                    ->label('URL / Nota')
+                    ->label('Notas')
                     ->limit(30),
             ])
             ->filters([
-                // Puedes añadir filtros aquí, ej:
+
                 Tables\Filters\SelectFilter::make('status')
-                    ->options([
-                        'Activo' => 'Activo',
-                        'Caido' => 'Caido',
-                    ]),
+                    ->options(ProjectStatus::class),
+                Tables\Filters\SelectFilter::make('technology')
+                    ->options(ProjectTechnology::class),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

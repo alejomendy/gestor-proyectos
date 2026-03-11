@@ -7,6 +7,7 @@ use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
+use App\Enums\MilestoneStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
@@ -30,13 +31,8 @@ class MilestonesRelationManager extends RelationManager
                 Forms\Components\DatePicker::make('start_date'),
                 Forms\Components\DatePicker::make('due_date'),
                 Forms\Components\Select::make('status')
-                    ->options([
-                        'pending' => 'Pendiente',
-                        'in_progress' => 'En Progreso',
-                        'completed' => 'Completado',
-                        'delayed' => 'Retrasado',
-                    ])
-                    ->default('pending')
+                    ->options(MilestoneStatus::class)
+                    ->default(MilestoneStatus::Pending)
                     ->required(),
                 Forms\Components\TextInput::make('progress')
                     ->numeric()
@@ -63,14 +59,7 @@ class MilestonesRelationManager extends RelationManager
                     ->date()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
-                    ->badge()
-                    ->color(fn(string $state): string => match ($state) {
-                        'pending' => 'gray',
-                        'in_progress' => 'info',
-                        'completed' => 'success',
-                        'delayed' => 'danger',
-                        default => 'gray',
-                    }),
+                    ->badge(),
                 Tables\Columns\TextColumn::make('progress')
                     ->numeric()
                     ->sortable()

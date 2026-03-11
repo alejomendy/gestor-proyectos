@@ -3,21 +3,21 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\TicketResource\Pages;
-use App\Filament\Resources\TicketResource\RelationManagers;
 use App\Models\Ticket;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Enums\TicketStatus;
 
 class TicketResource extends Resource
 {
     protected static ?string $model = Ticket::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-ticket';
+    protected static ?int $navigationSort = 3;
+    protected static ?string $navigationGroup = 'Gestión';
 
     public static function form(Form $form): Form
     {
@@ -34,8 +34,9 @@ class TicketResource extends Resource
                 Forms\Components\Textarea::make('description')
                     ->columnSpanFull(),
                 Forms\Components\Select::make('status')
-                    ->options(collect(Ticket::getStatuses())->mapWithKeys(fn($s, $k) => [$k => $s['label']])->toArray())
-                    ->default('todo')
+                    // ->options(collect(Ticket::getStatuses())->mapWithKeys(fn($s, $k) => [$k => $s['label']])->toArray())
+                    ->options(TicketStatus::class)
+                    ->default(TicketStatus::Backlog)
                     ->required(),
                 Forms\Components\Select::make('reporter_id')
                     ->relationship('reporter', 'name')
@@ -59,8 +60,8 @@ class TicketResource extends Resource
                 Tables\Columns\TextColumn::make('title')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('status')
-                    ->badge()
-                    ->color(fn(string $state): string => Ticket::getStatuses()[$state]['filament_color'] ?? 'gray'),
+                    ->badge(),
+                // ->color(fn(string $state): string => Ticket::getStatuses()[$state]['filament_color'] ?? 'gray'),
                 Tables\Columns\TextColumn::make('reporter.name')
                     ->label('Reportado por')
                     ->sortable(),

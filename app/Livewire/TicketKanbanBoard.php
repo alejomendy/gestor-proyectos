@@ -61,9 +61,9 @@ class TicketKanbanBoard extends Component implements HasForms, HasActions
                 Ticket::create([
                     ...$data,
                     'project_id' => $this->selectedProjectId,
-                    'status' => $arguments['status'] ?? 'todo',
+                    'status' => $arguments['status'] ?? 'Por asignar',
                     'order_column' => Ticket::where('project_id', $this->selectedProjectId)
-                        ->where('status', $arguments['status'] ?? 'todo')
+                        ->where('status', $arguments['status'] ?? 'Por asignar')
                         ->max('order_column') + 1,
                     'reporter_id' => auth()->id(),
                 ]);

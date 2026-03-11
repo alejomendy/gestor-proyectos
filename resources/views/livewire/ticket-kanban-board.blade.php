@@ -38,20 +38,20 @@
                         <div class="flex items-center gap-x-3.5">
                             @php
                                 $colIcon = match($statusKey) {
-                                    'backlog' => 'heroicon-s-list-bullet',
-                                    'in_review' => 'heroicon-s-chat-bubble-bottom-center-text', // bubble with pencil feel
-                                    'completed' => 'heroicon-s-check-circle',
+                                    'Por asignar' => 'heroicon-s-list-bullet',
+                                    'En revision' => 'heroicon-s-chat-bubble-bottom-center-text',
+                                    'Terminado' => 'heroicon-s-check-circle',
                                     default => 'heroicon-s-squares-plus'
                                 };
                                 $badgeColor = match($statusKey) {
-                                    'backlog' => 'bg-gray-200 text-gray-600',
-                                    'in_review' => 'bg-blue-100 text-blue-600',
-                                    'completed' => 'bg-green-100 text-green-600',
+                                    'Por asignar' => 'bg-gray-200 text-gray-600',
+                                    'En revision' => 'bg-blue-100 text-blue-600',
+                                    'Terminado' => 'bg-green-100 text-green-600',
                                     default => 'bg-gray-100 text-gray-500'
                                 };
                             @endphp
                             <div class="w-8 h-8 flex items-center justify-center rounded-lg bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm">
-                                <x-filament::icon :icon="$colIcon" class="w-4.5 h-4.5 {{ $statusKey === 'completed' ? 'text-green-500' : ($statusKey === 'in_review' ? 'text-blue-500' : 'text-gray-400') }}" />
+                                <x-filament::icon :icon="$colIcon" class="w-4.5 h-4.5 {{ $statusKey === 'Terminado' ? 'text-green-500' : ($statusKey === 'En revision' ? 'text-blue-500' : 'text-gray-400') }}" />
                             </div>
                             <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100 uppercase tracking-tight">
                                 {{ $status['label'] }}
@@ -74,9 +74,9 @@
                         @if($tickets->has($statusKey))
                             @foreach($tickets->get($statusKey) as $ticket)
                                 @php
-                                    $isBacklog = $statusKey === 'backlog';
-                                    $isInReview = $statusKey === 'in_review';
-                                    $isCompleted = $statusKey === 'completed';
+                                    $isBacklog = $statusKey === 'Por asignar';
+                                    $isInReview = $statusKey === 'En revision';
+                                    $isCompleted = $statusKey === 'Terminado';
                                     
                                     // Simulation of specific requirements based on Loop index or content
                                     $isFe102 = $isBacklog && $loop->first;

@@ -7,6 +7,7 @@ use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
+use App\Enums\TicketStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
@@ -24,13 +25,8 @@ class TicketsRelationManager extends RelationManager
                 Forms\Components\Textarea::make('description')
                     ->columnSpanFull(),
                 Forms\Components\Select::make('status')
-                    ->options([
-                        'todo' => 'Por hacer',
-                        'in_progress' => 'En progreso',
-                        'review' => 'En revisión',
-                        'done' => 'Hecho',
-                    ])
-                    ->default('todo')
+                    ->options(TicketStatus::class)
+                    ->default(TicketStatus::Backlog)
                     ->required(),
                 Forms\Components\Select::make('reporter_id')
                     ->relationship('reporter', 'name')
@@ -53,14 +49,7 @@ class TicketsRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('title')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('status')
-                    ->badge()
-                    ->color(fn(string $state): string => match ($state) {
-                        'todo' => 'gray',
-                        'in_progress' => 'info',
-                        'review' => 'warning',
-                        'done' => 'success',
-                        default => 'gray',
-                    }),
+                    ->badge(),
                 Tables\Columns\TextColumn::make('assignee.name')
                     ->label('Asignado a')
                     ->sortable(),

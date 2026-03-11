@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 
+use App\Enums\MilestoneStatus;
+
 class Milestone extends Model
 {
     use LogsActivity;
@@ -15,6 +17,7 @@ class Milestone extends Model
     protected $casts = [
         'start_date' => 'date',
         'due_date' => 'date',
+        'status' => MilestoneStatus::class,
     ];
 
     public function getActivitylogOptions(): LogOptions

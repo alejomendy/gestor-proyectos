@@ -16,8 +16,10 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class ServerResource extends Resource
 {
     protected static ?string $model = Server::class;
-
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $label = 'Servidores';
+    protected static ?string $navigationIcon = 'heroicon-o-server';
+    protected static ?int $navigationSort = 4;
+    protected static ?string $navigationGroup = 'Infraestructura';
 
     public static function form(Form $form): Form
     {
