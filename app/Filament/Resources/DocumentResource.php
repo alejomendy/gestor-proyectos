@@ -36,6 +36,7 @@ class DocumentResource extends Resource
                 Forms\Components\FileUpload::make('file_path')
                     ->label('Archivo')
                     ->directory('project-documents')
+                    ->disk('s3')
                     ->preserveFilenames()
                     ->openable()
                     ->downloadable(),

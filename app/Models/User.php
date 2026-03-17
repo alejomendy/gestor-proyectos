@@ -24,9 +24,9 @@ class User extends Authenticatable
         'role',
     ];
 
-    public function milestones()
+    public function historicals()
     {
-        return $this->belongsToMany(Milestone::class);
+        return $this->belongsToMany(Historical::class);
     }
 
     public function reportedTickets()

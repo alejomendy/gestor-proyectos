@@ -25,6 +25,7 @@ class DocumentsRelationManager extends RelationManager
                     ->label('Archivo')
                     ->directory('project-documents')
                     ->preserveFilenames()
+                    ->disk('s3')
                     ->openable()
                     ->downloadable(),
                 Forms\Components\Textarea::make('comments')

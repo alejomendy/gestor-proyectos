@@ -12,6 +12,11 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Infolists;
+use Filament\Infolists\Infolist;
+use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\TextEntry\TextEntrySize;
 use Filament\Tables\Columns\TextColumn;
 use App\Enums\ProjectStatus;
 use App\Enums\ProjectPriority;
@@ -80,6 +85,69 @@ class ProjectResource extends Resource
             ]);
     }
 
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                Section::make('Información Principal')
+                    ->schema([
+                        TextEntry::make('name')
+                            ->label('Nombre del Proyecto')
+                            ->size(TextEntrySize::Large)
+                            ->weight('bold'),
+                        TextEntry::make('status')
+                            ->label('Estado')
+                            ->badge(),
+                        TextEntry::make('priority')
+                            ->label('Prioridad')
+                            ->badge(),
+                        TextEntry::make('technology')
+                            ->label('Tecnología')
+                            ->badge()
+                            ->color(fn($state) => \App\Enums\ProjectTechnology::tryFrom($state)?->getColor() ?? 'gray')
+                            ->formatStateUsing(fn($state) => \App\Enums\ProjectTechnology::tryFrom($state)?->getLabel() ?? $state),
+                    ])->columns(4),
+
+                Section::make('Detalles Técnicos y Entorno')
+                    ->schema([
+                        TextEntry::make('server.name')
+                            ->label('Servidor de Despliegue')
+                            ->icon('heroicon-m-server'),
+                        TextEntry::make('environment_type')
+                            ->label('Entorno')
+                            ->badge(),
+                        TextEntry::make('framework')
+                            ->label('Framework')
+                            ->icon('heroicon-m-code-bracket'),
+                        TextEntry::make('repository_url')
+                            ->label('URL del Repositorio')
+                            ->icon('heroicon-m-link')
+                            ->url(fn ($record) => $record->repository_url)
+                            ->openUrlInNewTab(),
+                        TextEntry::make('domain')
+                            ->label('Dominio del Proyecto')
+                            ->icon('heroicon-m-globe-alt')
+                            ->url(fn ($record) => $record->domain)
+                            ->openUrlInNewTab(),
+                    ])->columns(3),
+                
+                Section::make('Equipo y Notas')
+                    ->schema([
+                        TextEntry::make('users.name')
+                            ->label('Usuarios Asignados')
+                            ->badge()
+                            ->separator(',')
+                            ->columnSpanFull(),
+                        TextEntry::make('app_url_or_note')
+                            ->label('Notas Rápidas / URL Secundaria')
+                            ->columnSpanFull(),
+                        TextEntry::make('notes')
+                            ->label('Detalles Extensos')
+                            ->columnSpanFull(),
+                    ]),
+            ]);
+    }
+
     public static function table(Table $table): Table
     {
         return $table
@@ -122,9 +190,9 @@ class ProjectResource extends Resource
                     ->label('Entorno')
                     ->badge(),
 
-                TextColumn::make('milestones_count')
-                    ->counts('milestones')
-                    ->label('Hitos')
+                TextColumn::make('historicals_count')
+                    ->counts('historicals')
+                    ->label('Historial')
                     ->badge()
                     ->color('info'),
 
@@ -151,6 +219,7 @@ class ProjectResource extends Resource
                     ->options(ProjectTechnology::class),
             ])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
@@ -161,7 +230,7 @@ class ProjectResource extends Resource
     public static function getRelations(): array
     {
         return [
-            RelationManagers\MilestonesRelationManager::class,
+            RelationManagers\HistoricalsRelationManager::class,
             RelationManagers\DocumentsRelationManager::class,
             RelationManagers\TicketsRelationManager::class,
         ];
@@ -172,6 +241,7 @@ class ProjectResource extends Resource
         return [
             'index' => Pages\ListProjects::route('/'),
             'create' => Pages\CreateProject::route('/create'),
+            'view' => Pages\ViewProject::route('/{record}'),
             'edit' => Pages\EditProject::route('/{record}/edit'),
         ];
     }

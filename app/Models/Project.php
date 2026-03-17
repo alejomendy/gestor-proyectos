@@ -34,9 +34,9 @@ class Project extends Model
         return $this->belongsToMany(User::class);
     }
 
-    public function milestones()
+    public function historicals()
     {
-        return $this->hasMany(Milestone::class);
+        return $this->hasMany(Historical::class);
     }
 
     public function documents()
