@@ -43,6 +43,10 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Project::class);
     }
+    public function canAccessFilament(): bool
+    {
+        return true;
+    }
 
     /**
      * The attributes that should be hidden for serialization.
